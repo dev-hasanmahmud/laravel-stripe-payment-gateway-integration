@@ -19,7 +19,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
+        'password', 
+        'account_active', 
+        'account_expires',
+        'failed_login_attempts', 
+        'last_failed_login',
     ];
 
     /**
@@ -42,6 +46,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'account_expires' => 'datetime',
         ];
     }
 }
