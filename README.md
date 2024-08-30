@@ -26,22 +26,22 @@ Tech Stack: Laravel 11, MySQL, Bootstrap
 
 Test instructions:
 - Localhost admin login: http://localhost:8000/
-  Email: admin@admin.com
-  Pass: password
+  - Email: admin@admin.com
+  - Pass: password
   
 - Credentials:
-  Payment https://dashboard.stripe.com/test/dashboard/
-    Email: sojohoc207@ndiety.com
-  	Pass: S!@#ojohoc207@
+  - Payment https://dashboard.stripe.com/test/dashboard/
+    - Email: sojohoc207@ndiety.com
+  	- Pass: S!@#ojohoc207@
 
-  	sojohoc207@ndiety.com
-    4242 4242 4242 4242
-	  12 / 25
-	  222
-	  Sojo Hoc
-	  Bangladesh
+  	- sojohoc207@ndiety.com
+    - 4242 4242 4242 4242
+	  - 12 / 25
+	  - 222
+	  - Sojo Hoc
+	  - Bangladesh
 
 - Mail https://mailtrap.io/
-	Email: bopeha4627@kwalah.com
-	Pass: bopeha4627@kwalah.com
-  Command for test: php artisan account_expiration:alert
+	- Email: bopeha4627@kwalah.com
+	- Pass: bopeha4627@kwalah.com
+  - Command for test: php artisan account_expiration:alert
