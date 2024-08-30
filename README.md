@@ -44,4 +44,5 @@ Test instructions:
 - Mail https://mailtrap.io/
 	- Email: bopeha4627@kwalah.com
 	- Pass: bopeha4627@kwalah.com
-  - Command for test: php artisan account_expiration:alert
+  - Command for Send Account Expiration Alert Test: php artisan account_expiration:alert
+  - Command for Update Expired Accounts Test: php artisan accounts:update-expired
