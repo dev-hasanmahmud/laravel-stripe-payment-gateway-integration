@@ -27,9 +27,11 @@ Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 /**
  * Route for payment
  */
-Route::get('payment/checkout', [PaymentController::class, 'createCheckoutSession'])->name('payment.checkout');
-Route::get('payment/success', [PaymentController::class, 'success'])->name('payment.success');
-Route::get('payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
+Route::get('/payment', [PaymentController::class, 'showPaymentForm'])->name('payment.form');
+Route::post('/payment', [PaymentController::class, 'processPayment'])->name('payment.process');
+Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
+
 
 
 

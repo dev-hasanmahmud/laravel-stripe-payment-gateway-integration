@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
+use App\Models\User;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     /**
-     * For show login page
+     * Show the login page.
      */
     public function showLoginForm()
     {
@@ -19,53 +21,62 @@ class AuthController extends Controller
     }
 
     /**
-     * For login
+     * Handle login attempts.
      */
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
 
-        $credentials = $request->only('email', 'password');
+            $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
 
-            // Reset failed login attempts
-            $user->failed_login_attempts = 0;
-            $user->save();
+                // Reset failed login attempts
+                $user->failed_login_attempts = 0;
+                $user->save();
 
-            // Check account active and expires
-            $this->checkUserStatus($user);
+                // Check account status
+                // $this->checkUserStatus($user);
 
-            return Redirect::intended('dashboard');
-        }
+                return Redirect::intended('dashboard');
+            }
 
-        // Custom logic for failed login attempts
-        $user = User::where('email', $request->input('email'))->first();
+            // Increment failed login attempts
+            $user = User::where('email', $request->input('email'))->first();
 
-        if ($user) {
-            $user->failed_login_attempts++;
-            $user->last_failed_login = now();
-            $user->save();
+            if ($user) {
+                $user->failed_login_attempts++;
+                $user->last_failed_login = now();
+                $user->save();
 
-            if ($user->failed_login_attempts > 2) {
-                $lastAttempt = $user->last_failed_login;
-                $lockoutDuration = now()->diffInMinutes($lastAttempt);
+                if ($user->failed_login_attempts > 2) {
+                    $lastAttempt = $user->last_failed_login;
+                    $lockoutDuration = now()->diffInMinutes($lastAttempt);
 
-                if ($lockoutDuration < 5) {
-                    return Redirect::back()->withErrors(['email' => 'Too many failed attempts. Try again after 5 minutes.']);
+                    if ($lockoutDuration < 5) {
+                        return Redirect::back()->withErrors(['email' => 'Too many failed attempts. Try again after 5 minutes.']);
+                    }
                 }
             }
-        }
 
-        return Redirect::back()->withErrors(['email' => 'Invalid credentials']);
+            return Redirect::back()->withErrors(['email' => 'Invalid credentials']);
+        } catch (ValidationException $e) {
+            // Handle validation exception
+            return Redirect::back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            // Log unexpected errors
+            Log::error('Login error: '.$e->getMessage());
+            return Redirect::back()->withErrors(['email' => 'An unexpected error occurred.']);
+        }
     }
 
     /**
-     * For show register form
+     * Show the registration form.
      */
     public function showRegistrationForm()
     {
@@ -73,31 +84,38 @@ class AuthController extends Controller
     }
 
     /**
-     * For Register
+     * Handle registration.
      */
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
-        $user = User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
-            'account_active' => true,
-            'account_expires' => now()->addMonth(),
-        ]);
+            $user = User::create([
+                'name' => $request->input('name'),
+                'email' => $request->input('email'),
+                'password' => Hash::make($request->input('password')),
+            ]);
 
-        Auth::login($user);
+            Auth::login($user);
 
-        return Redirect::route('dashboard');
+            return Redirect::route('dashboard');
+        } catch (ValidationException $e) {
+            // Handle validation exception
+            return Redirect::back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            // Log unexpected errors
+            Log::error('Registration error: '.$e->getMessage());
+            return Redirect::back()->withErrors(['email' => 'An unexpected error occurred during registration.']);
+        }
     }
 
     /**
-     * For logout
+     * Handle logout.
      */
     public function logout()
     {
@@ -107,7 +125,7 @@ class AuthController extends Controller
     }
 
     /**
-     * For check account active and expires
+     * Check account status and handle inactive or expired accounts.
      */
     protected function checkUserStatus($user)
     {

@@ -3,7 +3,7 @@
 @section('title', 'Register')
 
 @section('content')
-<div class="container">
+<div class="container col-md-5">
     <h2>Register</h2>
     <form method="POST" action="{{ route('register') }}" class="p-4 border rounded bg-light">
         @csrf
