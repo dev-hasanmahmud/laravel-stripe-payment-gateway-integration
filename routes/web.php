@@ -2,17 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\{
+    AuthController,
+    PaymentController,
+    DashboardController
+};
 
 /**
  * Route for Dashboard and Root
  */
 Route::redirect('/', 'dashboard');
 Route::middleware('auth')->group(function () {
-    Route::get('dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });
 
 /**
